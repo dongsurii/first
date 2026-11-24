@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>경마장 관리</title>
+<style>
+  body { font-family: system-ui, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif; max-width:520px; margin:40px auto; padding:0 16px; background:#f6f4ee; color:#1c1c1c; }
+  input, button { font-size:16px; padding:10px 14px; border-radius:8px; border:1px solid #bbb; }
+  input { width:100%; box-sizing:border-box; margin-bottom:12px; }
+  .row { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px; }
+  button { cursor:pointer; background:#fff; } button.go { background:#b3261e; color:#fff; border:none; font-weight:700; }
+  #msg { margin-top:12px; color:#555; min-height:1.5em; }
+</style>
+</head>
+<body>
+<h1>🏇 경마장 관리</h1>
+<input id="key" type="password" placeholder="ADMIN_KEY">
+<div class="row">
+  <button class="go" onclick="call('start')">🔫 출발</button>
+  <button onclick="call('rematch')">🔄 같은 멤버로 재경기</button>
+  <button onclick="if(confirm('참가자를 모두 지울까요?')) call('reset')">🧹 전체 초기화</button>
+</div>
+<div class="row">
+  <input id="kick" placeholder="내보낼 닉네임" style="flex:1;margin:0">
+  <button onclick="call('kick', {name: document.getElementById('kick').value})">내보내기</button>
+</div>
+<div id="msg"></div>
+<p><a href="/" target="_blank">경주 화면 열기 →</a></p>
+<script>
+const k = document.getElementById("key");
+try { k.value = sessionStorage.getItem("k") || ""; } catch {}
+async function call(action, extra = {}) {
+  try { sessionStorage.setItem("k", k.value); } catch {}
+  const r = await fetch("/admin/" + action, { method:"POST", headers:{ "Content-Type":"application/json" }, body: JSON.stringify({ key: k.value, ...extra }) });
+  const j = await r.json();
+  document.getElementById("msg").textContent = r.ok ? "✅ " + action + " 완료" : "❌ " + (j.error || r.status);
+}
+</script>
+</body>
+</html>
